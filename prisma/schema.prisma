@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Subject {
+  id          Int      @id @unique @default(autoincrement()) @map("id") @db.UnsignedTinyInt
+  subjectCode String   @unique @map("subject_code") @db.Char(6)
+  title       String   @map("title") @db.VarChar(40)
+  credit      Float    @default(3) @map("credit")
+  courses     Course[] @relation("SubjectCourses")
+
+  @@map("subjects")
+}
+
+model Course {
+  id        Int             @id @unique @default(autoincrement()) @map("id") @db.UnsignedTinyInt
+  subjectId Int             @map("subject_id") @db.UnsignedTinyInt
+  year      Int             @map("year") @db.Year
+  students  CourseStudent[]
+  subject   Subject         @relation("SubjectCourses", fields: [subjectId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "courses_subject_id_fk")
+
+  @@index([subjectId], map: "idx_fk_subject_id")
+  @@map("courses")
+}
+
+model Student {
+  id      Int             @id @unique @default(autoincrement()) @map("id") @db.UnsignedTinyInt
+  name    String          @map("name") @db.VarChar(40)
+  courses CourseStudent[]
+
+  @@map("students")
+}
+
+model CourseStudent {
+  courseId  Int     @map("course_id") @db.UnsignedTinyInt
+  studentId Int     @map("student_id") @db.UnsignedTinyInt
+  grade     Float   @map("grade")
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "course_student_courses_id_fk")
+  student   Student @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "course_student_students_id_fk")
+
+  @@id([courseId, studentId])
+  @@index([courseId], map: "idx_fk_course_id")
+  @@index([studentId], map: "idx_fk_student_id")
+  @@map("course_student")
+}
