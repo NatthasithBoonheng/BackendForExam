@@ -1,0 +1,24 @@
+npm i express
+npm install prisma@5.22.0 @prisma/client@5.22.0
+npm morgan
+npm install mysql2
+npm install dotenv
+
+npx prisma init
+จะได้ไฟล์:
+.env
+prisma/schema.prisma
+
+แก้ใน .ENV
+DATABASE_URL="mysql://root:password@localhost:3306/mydb"
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+} แก้อันนี้ในไฟล์ schema.prisma ด้วย
+
+เสร็จแล้วก็ npx prisma db pull ดึงข้อมูลมาจาก db
+แล้วก็ทำการ ** REFACTOR ** สำคัญมากดูดีๆจุดนี้พยายามให้ AI ช่วย
+
+ถ้าเรียบร้อยแล้วก็ npx prisma generate เลย
+

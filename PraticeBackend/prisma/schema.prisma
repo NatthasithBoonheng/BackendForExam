@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model CourseStudent {
+  courseId  Int     @db.UnsignedTinyInt @map("course_id")
+  studentId Int     @db.UnsignedTinyInt @map("student_id")
+  grade     Float
+
+  // Relation fields: ต้องเป็น single object ไม่ใช่ array
+  course  Course  @relation("CourseCourseStudent", fields: [courseId], references: [id])
+  student Student @relation("StudentCourseStudent", fields: [studentId], references: [id])
+
+  @@map("course_student")
+  @@id([courseId, studentId])
+  @@index([courseId], map: "idx_fk_course_id")
+  @@index([studentId], map: "idx_fk_student_id")
+}
+
+model Course {
+  id             Int             @id @default(autoincrement()) @db.UnsignedTinyInt
+  subjectId      Int             @map("subject_id") @db.UnsignedTinyInt
+  year           Int             @db.Year
+
+  courseStudents CourseStudent[] @relation("CourseCourseStudent")
+
+  subject Subject @relation("SubjectCourses", fields: [subjectId], references: [id])
+
+  @@index([subjectId], map: "idx_fk_subject_id")
+  @@map("courses")
+}
+
+model Student {
+  id             Int             @id @default(autoincrement()) @db.UnsignedTinyInt
+  name           String          @db.VarChar(40)
+
+  courseStudents CourseStudent[] @relation("StudentCourseStudent")
+
+  @@map("students")
+}
+
+model Subject {
+  id          Int      @id @default(autoincrement()) @db.UnsignedTinyInt
+  subjectCode String   @unique @db.Char(6) @map("subject_code")
+  title       String   @db.VarChar(40)
+  credit      Float    @default(3)
+
+  courses     Course[] @relation("SubjectCourses")
+
+  @@map("subjects")
+}
